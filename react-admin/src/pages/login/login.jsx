@@ -4,8 +4,19 @@ import logo from './images/logo.png'
 import { Form, Icon, Input, Button } from 'antd';
 //login router component
 
-export default class Login extends Component{
+const Item = Form.Item; //cannot before import
+class Login extends Component{
+    handleSubmit = (event) => {
+        //prevent event default action
+        event.preventDefault();
+        //get form object
+        const form = this.props.form;
+        const values = form.getFieldsValue();
+        console.log(values);
+    }
     render(){
+        const form = this.props.form;
+        const {getFieldDecorator} = form;
         return(
             <div className = "login">
                 <header className = "login-header">
@@ -15,27 +26,42 @@ export default class Login extends Component{
                 <section className = "login-content">
                     <h2>User Login</h2> 
                     <Form onSubmit={this.handleSubmit} className="login-form">
-                        <Form.Item>
-                            <Input
+                        <Item>
+                            {/*<Input
                                 prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
                                 placeholder="Username" 
-                            />
-                        </Form.Item>
-                        <Form.Item>
-                            <Input
-                                prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                                type="password"
-                                placeholder="Password"
-                            />
-                        </Form.Item>
-                        <Form.Item>
+                            />*/}
+                            {getFieldDecorator('username',{})(
+                                <Input
+                                    prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                                    placeholder="Username" 
+                                />
+                            )}
+                        </Item>
+                        <Item>
+                            {getFieldDecorator('password',{})(
+                                <Input
+                                    prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                                    type='password'
+                                    placeholder="Password" 
+                                />
+                            )}
+                            
+                        </Item>
+                        <Item>
                             <Button type="primary" htmlType="submit" className="login-form-button">
                                 Log in
                             </Button>
-                        </Form.Item>
+                        </Item>
                     </Form>
                 </section>
             </div> 
         )
     }
 }
+
+
+const WrapLogin = Form.create()(Login)
+export default WrapLogin
+//frontend form validation
+
