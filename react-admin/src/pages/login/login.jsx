@@ -14,6 +14,34 @@ class Login extends Component{
         const values = form.getFieldsValue();
         console.log(values);
     }
+
+    /**
+     self validation for password
+     */
+    validatePwd = (rule, value, callback) =>{
+        
+                            
+                            /* username / password validation
+                            1). required
+                            2). at least or equal 4
+                            3). at most  or equal 12
+                            4). letters, numbers or underscore */ 
+        
+        console.log('validatePwd',rule,value)
+        if(!value){
+            callback('password is required')
+        }else if(value.length < 4){
+            callback('password length should greater than 4')
+        }else if(value.length > 12){
+            callback('password length should less than 12')
+        }else if (!/^[a-zA-Z0-9_]+$/.test(value)){
+            callback('password should be letters, numbers or underscore')
+        }else{
+            callback()
+        }
+        //callback() //pass
+        //callback('XXX') //fail, show hint message
+    }
     render(){
         const form = this.props.form;
         const {getFieldDecorator} = form;
@@ -27,11 +55,21 @@ class Login extends Component{
                     <h2>User Login</h2> 
                     <Form onSubmit={this.handleSubmit} className="login-form">
                         <Item>
-                            {/*<Input
-                                prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                                placeholder="Username" 
-                            />*/}
-                            {getFieldDecorator('username',{})(
+                            {/**
+                            声明式验证: 直接用别人定义好的验证
+                            /* username / password validation
+                            1). required
+                            2). at least 4
+                            3). at most 12
+                            4). letters, numbers or underscore */  }
+                            {getFieldDecorator('username',{ //configuration object: if property name is 
+                                rules: [
+                                    {required:true, whitespace: true, message: 'Please input your username!'},
+                                    {min: 4, message: 'minimum username length is at least 4'},
+                                    {max: 12, message: 'maximum username length is at least 12'},
+                                    {pattern: /^[a-zA-Z0-9_]+$/, message: 'username should be letters, numbers or underscore'},
+                                ],
+                            })(
                                 <Input
                                     prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
                                     placeholder="Username" 
@@ -39,7 +77,13 @@ class Login extends Component{
                             )}
                         </Item>
                         <Item>
-                            {getFieldDecorator('password',{})(
+                            {getFieldDecorator('password',{
+                                rules:[
+                                    {
+                                        validator: this.validatePwd
+                                    }
+                                ]
+                            })(
                                 <Input
                                     prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
                                     type='password'
