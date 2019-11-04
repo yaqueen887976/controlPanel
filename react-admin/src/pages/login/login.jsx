@@ -9,11 +9,20 @@ class Login extends Component{
     handleSubmit = (event) => {
         //prevent event default action
         event.preventDefault();
+        //validte all forms
+        this.props.form.validateFields((err,values) => {
+            //if success
+            if (!err){
+                console.log('submit login ajax request ',values);
+            }else{
+                console.log('validation fails');
+            }
+        });
         //get form object
-        const form = this.props.form;
-        const values = form.getFieldsValue();
-        console.log(values);
-    }
+        //const form = this.props.form;
+        //const values = form.getFieldsValue();
+        //console.log(values);
+    }     
 
     /**
      self validation for password
@@ -21,11 +30,11 @@ class Login extends Component{
     validatePwd = (rule, value, callback) =>{
         
                             
-                            /* username / password validation
-                            1). required
-                            2). at least or equal 4
-                            3). at most  or equal 12
-                            4). letters, numbers or underscore */ 
+        /* username / password validation
+         1). required
+         2). at least or equal 4
+         3). at most  or equal 12
+         4). letters, numbers or underscore */ 
         
         console.log('validatePwd',rule,value)
         if(!value){
