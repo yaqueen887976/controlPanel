@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
 A module that can send ajax request
 return promise object
@@ -31,4 +32,26 @@ export default function ajax(url, data = {}, type = 'GET'){
 //ajax('login',{username: 'Tom', password: '12345'}, 'POST').then();
  
 //add users
+=======
+/*
+A module that can send ajax request
+return promise object
+*/
+
+import axios from 'axios';
+export default function ajax(url, data = {}, type = 'GET'){
+    if (type === 'GET'){
+        return axios.get(url,{ //config object
+            params: data
+        });
+    }else{
+        return axios.post(url,data);
+    }
+}
+
+//request login 
+//ajax('login',{username: 'Tom', password: '12345'}, 'POST').then();
+
+//add users
+>>>>>>> 0eab15da10fbf553a4e4a73ae30b5a312180efbc
 //ajax('/manage/user/add', {username: 'Tom', password: '12345', phone:'13320003060'}, 'POST').then();
