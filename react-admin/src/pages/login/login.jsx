@@ -1,7 +1,14 @@
-import React, {Component} from 'react'
-import './login.less'
-import logo from './images/logo.png'
+import React, {Component} from 'react';
+import './login.less';
+import logo from './images/logo.png';
 import { Form, Icon, Input, Button } from 'antd';
+import {reqLogin} from '../../api/index';
+import {message} from 'antd';
+import memoryUtils from '../../utils/memoryUtils';
+import storageUtils from '../../utils/storageUtils';
+import {Redirect} from 'react-router-dom';
+
+
 //login router component
 
 const Item = Form.Item; //cannot before import
@@ -10,10 +17,26 @@ class Login extends Component{
         //prevent event default action
         event.preventDefault();
         //validte all forms
-        this.props.form.validateFields((err,values) => {
+        this.props.form.validateFields(async (err,values) => {
             //if success
             if (!err){
-                console.log('submit login ajax request ',values);
+                //console.log('submit login ajax request ',values);
+                const {username, password} = values;
+                const result = await reqLogin(username, password);
+                //console.log('request success',response.data);
+                //const result = response.data; // {status:0, data: user} {status:1, msg: 'xxx'}
+                if( result.status === 0){ //login success
+                    message.success('login success');
+
+                    //save users
+                    const user = result.data;
+                    memoryUtils.user = user; // store in memory
+                    storageUtils.saveUser(user); //save to local
+                    //go to admin page
+                    this.props.history.replace('/');
+                }else{ //login fails
+                    message.error(result.msg);
+                }
             }else{
                 console.log('validation fails');
             }
@@ -52,6 +75,11 @@ class Login extends Component{
         //callback('XXX') //fail, show hint message
     }
     render(){
+        //if user is already logged in, jump to admin automatically
+        const user = memoryUtils.user;
+        if(user._id){
+            return <Redirect to = '/'/>
+        }
         const form = this.props.form;
         const {getFieldDecorator} = form;
         return(
