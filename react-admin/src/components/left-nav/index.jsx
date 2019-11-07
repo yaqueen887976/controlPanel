@@ -61,6 +61,7 @@ class LeftNav extends Component{
      use reduce() and recursion
      */
     getMenuNodes = (menuList)=>{
+        const path = this.props.location.pathname;
         return menuList.reduce((pre,item) =>{
             //add <Menu.Item>/ <SubMenu> to pre
             if(!item.children){
@@ -73,6 +74,17 @@ class LeftNav extends Component{
                     </Menu.Item>
                 ))
             }else{
+                //if have children
+                //find a child item that can match current request path
+                const cItem = item.children.find(cItem => cItem.key === path)
+
+                if(cItem){
+                    this.openKey = item.key;
+                }
+                //if cItem is true, means current item's subMenu should be open
+                
+                
+
                 //add <SubMenu>
                 pre.push(
                     <SubMenu
@@ -92,13 +104,18 @@ class LeftNav extends Component{
         },[])
     }
 
+    componentWillMount(){
+        this.menuNodes = this.getMenuNodes(menuList);
+    }
     render(){
+        //const menuNodes = this.getMenuNodes(menuList);
+        //debugger
         const path = this.props.location.pathname;
+        const openKey = this.openKey;
         return(
             <div>
                 <div className = "left-nav">
                     <Link to = '/'  className="left-nav-header">
-                        
                         <h1>Backend</h1>
                     </Link>
                 </div>
@@ -106,12 +123,13 @@ class LeftNav extends Component{
                 <Menu
                     mode="inline"
                     theme="dark"
-                    selectedKeys = {[path]}
+                    selectedKeys = {[path]}defaultOpenKeys
+                    defaultOpenKeys = {[openKey]}
                 >
                     
 
                     {
-                        this.getMenuNodes(menuList)
+                        this.menuNodes
                     }
                 
             </Menu>
