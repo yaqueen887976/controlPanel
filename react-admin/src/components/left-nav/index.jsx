@@ -2,7 +2,8 @@ import React, {Component} from 'react';
 import './index.less';
 import logo from '../../assets/images/logo.png';
 import { Menu, Icon, Button } from 'antd';
-import {Link} from 'react-router-dom'
+import {Link} from 'react-router-dom';
+import menuList from '../../config/menuConfig';
 /**
  * Left side navigation component
  */
@@ -10,6 +11,50 @@ import {Link} from 'react-router-dom'
 
 const SubMenu = Menu.SubMenu;
 export default class LeftNav extends Component{
+
+    /**
+     According to menu data array automatically produce tag array
+     */
+    getMenuNodes = (menuList) =>{
+        return menuList.map(item =>{
+            /**
+             item was like:
+             {
+                title: 'home', 
+                key: '/home',  //path
+                icon: 'home', 
+                childern: [], // can be empty or not
+            }, 
+             */
+            if (!item.children){
+                return (
+                    <Menu.Item key= {item.key}>
+                        <Link to = {item.key}>
+                            <Icon type= {item.icon} />
+                            <span>{item.title}</span>
+                        </Link>
+                    </Menu.Item>
+                )
+            }else{
+                return(
+                    <SubMenu
+                        key={item.key}
+                        title={
+                        <span>
+                            <Icon type={item.icon} />
+                            <span>{item.title}</span>
+                        </span>
+                        }
+                    >
+                        {this.getMenuNodes(item.children)}
+                    </SubMenu>
+                )
+
+            }
+            
+        })
+    }
+
     render(){
         return(
             <div>
@@ -21,14 +66,15 @@ export default class LeftNav extends Component{
                 </div>
 
                 <Menu
-                    
                     mode="inline"
                     theme="dark"
-                    
-                    >
-                    <Menu.Item key="1">
-                        <Icon type="pie-chart" />
-                        <span>Home Page</span>
+                >
+                    {/*
+                    <Menu.Item key="home">
+                        <Link to = '/home'>
+                            <Icon type="pie-chart" />
+                            <span>Home Page</span>
+                        </Link>
                     </Menu.Item>
                     
                     <SubMenu
@@ -40,16 +86,40 @@ export default class LeftNav extends Component{
                         </span>
                         }
                     >
-                        <Menu.Item key="5">
-                            <Icon type="mail" />
-                            <span>Category Manage</span>
+                        <Menu.Item key="category">
+                            <Link to = "category">
+                                <Icon type="mail" />
+                                <span>Category Manage</span>
+                            </Link>
                         </Menu.Item>
-                        <Menu.Item key="6">
-                            <Icon type="mail" />
-                            <span>Product Manage</span>
+                        <Menu.Item key="product">
+                            <Link to = "product">
+                                <Icon type="mail" />
+                                <span>Product Manage</span>
+                            </Link>
                         </Menu.Item>
                         
                     </SubMenu>
+
+                    <Menu.Item key="user">
+                        <Link to = '/user'>
+                            <Icon type="pie-chart" />
+                            <span>User Management</span>
+                        </Link>
+                    </Menu.Item>
+
+                    <Menu.Item key="role">
+                        <Link to = '/role'>
+                            <Icon type="pie-chart" />
+                            <span>Role Management</span>
+                        </Link>
+                    </Menu.Item>
+
+                    */}
+
+                    {
+                        this.getMenuNodes(menuList)
+                    }
                 
             </Menu>
 
