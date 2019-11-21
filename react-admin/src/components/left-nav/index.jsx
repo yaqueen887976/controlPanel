@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import './index.less';
 import logo from '../../assets/images/logo.png';
-import { Menu, Icon, Button } from 'antd';
+import { Menu, Icon } from 'antd';
 import {Link, withRouter} from 'react-router-dom';
 import menuList from '../../config/menuConfig';
 /**
