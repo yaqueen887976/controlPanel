@@ -34,4 +34,11 @@ export const reqWeather = (city) =>{
    
 }
 
+//get primary, secondary category
+export const reqCategorys = (parentId) => ajax(BASE + '/manage/category/list',{parentId})
+
+//add category
+export const reqAddCategory = (categoryName,parentId) => ajax(BASE + '/manage/category/add',{categoryName, parentId},'POST')
+
+export const reqUpdateCategory = ({categoryId,categoryName}) => ajax(BASE + '/manage/category/update',{categoryId, categoryName},'POST')
 //reqWeather("北京")
