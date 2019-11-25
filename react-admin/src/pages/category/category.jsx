@@ -7,6 +7,9 @@ export default class Category extends Component{
   state = {
     loading: false,
     categories: [],
+    subCategories: [],
+    parentId: '0', 
+    parentName: '',
   }
 
   initColumns = () =>{
@@ -19,10 +22,10 @@ export default class Category extends Component{
       {
         title: 'Modify',
         width:300,
-        render: () => (
+        render: (category) => (
           <span>
             <LinkButton>Modify Category</LinkButton>
-            <LinkButton>Sub Category</LinkButton>
+            <LinkButton onClick = {() => this.showSubCategories(category)}>Sub Category</LinkButton>
           </span>
 
           )
@@ -31,20 +34,41 @@ export default class Category extends Component{
     ];
   }
 
+  showSubCategories = (category) =>{
+    //update state first
+    this.setState({
+      parentId: category._id,
+      parentName: category.name
+    }, ()=>{ //execute after update state and re-render
+      //get sub categories
+      this.getCategories()
+    })
+    
+  }
+
   getCategories = async() => {
     //before send request, laoding is true 
     this.setState({loading : true});
-    const result = await reqCategorys('0');
+    const {parentId} = this.state;
+
+    const result = await reqCategorys(parentId);
     this.setState({loading : false});
     if (result.status === 0 ){
       const categories = result.data;
-      this.setState({
-        categories
-      })
+      if(parentId === '0'){ //if it's parentId is 0, then it is primary category
+        this.setState({
+          categories: categories
+        })
+      }else{
+        this.setState({
+          subCategories : categories
+        })
+      }
     }else{
       message.error("Cannot Get Categories");
     }
   }
+
   componentWillMount () { //prepare data for render
     this.initColumns();
   }
@@ -55,7 +79,7 @@ export default class Category extends Component{
   }
 
   render(){
-        const {categories, loading} = this.state;
+        const {categories, subCategories, parentId,parentName, loading} = this.state;
         //lefthand side
         const title = "Primary Category List";
         //card right side
@@ -73,7 +97,7 @@ export default class Category extends Component{
                 <Table 
                   bordered
                   rowKey="_id"
-                  dataSource={categories} 
+                  dataSource={parentId === '0'? categories : subCategories} 
                   columns={this.columns} 
                   loading = {loading}
                   pagination = {{defaultPageSize: 5, showQuickJumper: true}}
