@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Card, Table, Button, Icon, message} from 'antd';
+import {Card, Table, Button, Icon, message, Modal} from 'antd';
 import LinkButton from '../../components/link-button';
 import {reqCategorys} from '../../api';
 
@@ -10,6 +10,7 @@ export default class Category extends Component{
     subCategories: [],
     parentId: '0', 
     parentName: '',
+    showStatus: 0 //check whether add/update dialog show or not, 0 means invisible  1: add 2: update
   }
 
   initColumns = () =>{
@@ -24,8 +25,9 @@ export default class Category extends Component{
         width:300,
         render: (category) => (
           <span>
-            <LinkButton>Modify Category</LinkButton>
-            <LinkButton onClick = {() => this.showSubCategories(category)}>Sub Category</LinkButton>
+            <LinkButton onClick = {this.showUpdate}>Modify Category</LinkButton>
+            {this.state.parentId === '0'?<LinkButton onClick = {() => this.showSubCategories(category)}>Sub Category</LinkButton>:null}
+            
           </span>
 
           )
@@ -44,6 +46,15 @@ export default class Category extends Component{
       this.getCategories()
     })
     
+  }
+
+  showCategories = () =>{
+    
+    this.setState({
+      parentId: '0',
+      parentName: '',
+      subCategories :[]
+    })
   }
 
   getCategories = async() => {
@@ -69,6 +80,32 @@ export default class Category extends Component{
     }
   }
 
+  //when click candle, hide dialog box
+  handleCancel = () =>{
+    this.setState({
+      showStatus: 0
+    })
+  }
+
+  showAdd = () =>{
+    this.setState({
+      showStatus: 1
+    })
+  }
+
+  addCategory = () =>{
+    console.log('add category');
+  }
+
+  showUpdate = () =>{
+    this.setState({
+      showStatus:2
+    })
+  }
+  updateCategory = () =>{
+    console.log('update category');
+  }
+
   componentWillMount () { //prepare data for render
     this.initColumns();
   }
@@ -79,12 +116,18 @@ export default class Category extends Component{
   }
 
   render(){
-        const {categories, subCategories, parentId,parentName, loading} = this.state;
+        const {categories, subCategories, parentId,parentName, loading, showStatus} = this.state;
         //lefthand side
-        const title = "Primary Category List";
+        const title = parentId === '0'? "Primary Category List":(
+          <span>
+            <LinkButton onClick = {this.showCategories}>Primary Category List</LinkButton>
+            <Icon type="arrow-right" style={{marginRight:5}}/>
+        <span>{parentName}</span>
+          </span>
+        );
         //card right side
         const extra = (
-            <Button type = 'primary'>
+            <Button type = 'primary' onClick = {this.showAdd}>
                 <Icon type = 'plus'></Icon>
                 Add
             </Button>
@@ -102,6 +145,30 @@ export default class Category extends Component{
                   loading = {loading}
                   pagination = {{defaultPageSize: 5, showQuickJumper: true}}
                 />
+
+              <Modal
+                  title="Add Category"
+                  visible={showStatus===1}
+                  onOk={this.addCategory}
+                  onCancel={this.handleCancel}
+                  okButtonProps={{ disabled: true }}
+                  cancelButtonProps={{ disabled: true }}
+                >
+                  <p>Add Category</p>
+                  
+              </Modal>
+
+              <Modal
+                title="Modify Category"
+                visible={showStatus===2}
+                onOk={this.updateCategory}
+                onCancel={this.handleCancel}
+                okButtonProps={{ disabled: true }}
+                cancelButtonProps={{ disabled: true }}
+              >
+                <p>Update Category</p>
+               
+              </Modal>
             </Card>
         )
     }
