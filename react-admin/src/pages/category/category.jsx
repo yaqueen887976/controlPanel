@@ -1,7 +1,9 @@
 import React, {Component} from 'react';
 import {Card, Table, Button, Icon, message, Modal} from 'antd';
 import LinkButton from '../../components/link-button';
-import {reqCategorys} from '../../api';
+import {reqCategorys, reqUpdateCategory, reqAddCategory} from '../../api';
+import AddForm from './add-form';
+import UpdateForm from './update-form';
 
 export default class Category extends Component{
   state = {
@@ -25,7 +27,7 @@ export default class Category extends Component{
         width:300,
         render: (category) => (
           <span>
-            <LinkButton onClick = {this.showUpdate}>Modify Category</LinkButton>
+            <LinkButton onClick = {()=>this.showUpdate(category)}>Modify Category</LinkButton>
             {this.state.parentId === '0'?<LinkButton onClick = {() => this.showSubCategories(category)}>Sub Category</LinkButton>:null}
             
           </span>
@@ -57,10 +59,10 @@ export default class Category extends Component{
     })
   }
 
-  getCategories = async() => {
+  getCategories = async(parentId) => {
     //before send request, laoding is true 
     this.setState({loading : true});
-    const {parentId} = this.state;
+    parentId = parentId || this.state.parentId;
 
     const result = await reqCategorys(parentId);
     this.setState({loading : false});
@@ -82,6 +84,7 @@ export default class Category extends Component{
 
   //when click candle, hide dialog box
   handleCancel = () =>{
+    this.form.resetFields();
     this.setState({
       showStatus: 0
     })
@@ -93,17 +96,76 @@ export default class Category extends Component{
     })
   }
 
-  addCategory = () =>{
+  addCategory =  () =>{
     console.log('add category');
+
+    this.form.validateFields(async (err, values)=>{
+        if(!err){
+            //hide modal when hit ok
+            this.setState({
+                showStatus: 0
+            })
+
+            //collect data and submit add request
+            //const {parentId, categoryName} = this.form.getFieldsValue();
+            const {parentId, categoryName} = values;
+            this.form.resetFields();
+            const result = await reqAddCategory(categoryName, parentId);
+
+            if(result.status ===0){
+                //re show category
+                if(parentId === this.state.parentId){
+                    this.getCategories();
+                }else if(parentId ==='0'){
+                    this.getCategories(parentId);
+                }
+                
+            }
+        }
+    })
+    
+    
   }
 
-  showUpdate = () =>{
+  showUpdate = (category) =>{
+    //save category object
+    this.category = category;
+    //update state
     this.setState({
       showStatus:2
     })
   }
-  updateCategory = () =>{
-    console.log('update category');
+
+  updateCategory =  () =>{
+    console.log('update category'); 
+
+    //validate form,
+    this.form.validateFields(async (err, values)=>{
+        if(!err){
+            //1. close window
+            this.setState({
+                showStatus: 0
+            })
+
+            //prepare data
+            const categoryId = this.category._id;
+            this.form.resetFields();
+            //const categoryName = this.form.getFieldValue('categoryName');
+            const {categoryName} = values;
+
+            
+
+            //2. send request to update form
+            const result = await reqUpdateCategory({categoryId,categoryName});
+            if(result.status ===0){//success
+                //3. reshow the updated form
+                this.getCategories();
+            }
+        }
+    });
+    
+    
+
   }
 
   componentWillMount () { //prepare data for render
@@ -117,6 +179,7 @@ export default class Category extends Component{
 
   render(){
         const {categories, subCategories, parentId,parentName, loading, showStatus} = this.state;
+        const category = this.category || {};
         //lefthand side
         const title = parentId === '0'? "Primary Category List":(
           <span>
@@ -151,10 +214,13 @@ export default class Category extends Component{
                   visible={showStatus===1}
                   onOk={this.addCategory}
                   onCancel={this.handleCancel}
-                  okButtonProps={{ disabled: true }}
-                  cancelButtonProps={{ disabled: true }}
+                  
                 >
-                  <p>Add Category</p>
+                  <AddForm 
+                    categories ={categories} 
+                    parentId = {parentId}
+                    setForm = {(form) =>{this.form = form}}
+                />
                   
               </Modal>
 
@@ -163,10 +229,12 @@ export default class Category extends Component{
                 visible={showStatus===2}
                 onOk={this.updateCategory}
                 onCancel={this.handleCancel}
-                okButtonProps={{ disabled: true }}
-                cancelButtonProps={{ disabled: true }}
+                
               >
-                <p>Update Category</p>
+                <UpdateForm 
+                    categoryName = {category.name} 
+                    setForm = {(form) =>{this.form = form}}
+                />
                
               </Modal>
             </Card>
