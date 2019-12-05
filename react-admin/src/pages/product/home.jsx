@@ -8,13 +8,15 @@ import {
     Table
 } from 'antd';
 import LinkButton from '../../components/link-button';
-
+import {reqProducts} from '../../api';
+import {PAGE_SIZE} from '../../utils/constants';
 
 const Option = Select.Option;
 export default class ProductHome extends Component{
     state ={
         products: [], //products array, initial is empty
-
+        total: 0, //total quantity of a product 
+        loading: false
     }
     //initialize table columns
     initColumns =()=>{
@@ -61,14 +63,29 @@ export default class ProductHome extends Component{
           ];
     }
 
+    getProducts = async (pageNum) =>{
+        this.setState({loading: true}); //show loading
+        const result = await reqProducts(pageNum,PAGE_SIZE);
+        this.setState({loading: false}); //hide loading
+        if(result.status ===0){
+            const {total,list} = result.data;
+            this.setState({
+                total,
+                products: list
+            })
+        }
+    }
+
     componentWillMount(){
         this.initColumns();
     }
-    render(){
-        const {products} = this.state;
 
-        
-          
+    componentDidMount(){
+        this.getProducts(1);
+    }
+    render(){
+        const {products, total, loading} = this.state;
+  
         const title = (
             <span>
                 <Select value = '1' style={{width:150}}>
@@ -91,8 +108,15 @@ export default class ProductHome extends Component{
                 <Table 
                     bordered
                     rowKey="_id"
+                    loading = {loading}
                     dataSource={products} 
                     columns={this.columns} 
+                    pagination ={{
+                        total, 
+                        defaultPageSize:PAGE_SIZE, 
+                        showQuickJumper: true,
+                        onChange: (pageNum)=>{this.getProducts(pageNum)}
+                    }}
                 />
             </Card>
         )
