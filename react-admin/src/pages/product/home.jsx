@@ -8,7 +8,7 @@ import {
     Table
 } from 'antd';
 import LinkButton from '../../components/link-button';
-import {reqProducts} from '../../api';
+import {reqProducts, reqSearchProducts} from '../../api';
 import {PAGE_SIZE} from '../../utils/constants';
 
 const Option = Select.Option;
@@ -16,7 +16,9 @@ export default class ProductHome extends Component{
     state ={
         products: [], //products array, initial is empty
         total: 0, //total quantity of a product 
-        loading: false
+        loading: false,
+        searchName: '', //search keywords
+        searchType: 'productName',//search type, default is productName
     }
     //initialize table columns
     initColumns =()=>{
@@ -65,7 +67,16 @@ export default class ProductHome extends Component{
 
     getProducts = async (pageNum) =>{
         this.setState({loading: true}); //show loading
-        const result = await reqProducts(pageNum,PAGE_SIZE);
+
+        //if keywords is not empty, show search products
+        const {searchName, searchType} = this.state;
+        let result;
+        if(searchName){
+            result = await reqSearchProducts({pageNum,pageSize:PAGE_SIZE, searchName, searchType});
+        }else{
+            result = await reqProducts(pageNum,PAGE_SIZE);
+        }
+        
         this.setState({loading: false}); //hide loading
         if(result.status ===0){
             const {total,list} = result.data;
@@ -84,16 +95,25 @@ export default class ProductHome extends Component{
         this.getProducts(1);
     }
     render(){
-        const {products, total, loading} = this.state;
+        const {products, total, loading, searchType, searchName} = this.state;
   
         const title = (
             <span>
-                <Select value = '1' style={{width:150}}>
-                    <Option value = '1'>Search By Name</Option>
-                    <Option value = '2'>Search By Description</Option>
+                <Select 
+                    value = {searchType} 
+                    style={{width:150}} 
+                    onChange={value =>this.setState({searchType:value})}
+                >
+                    <Option value = 'productName'>Search By Name</Option>
+                    <Option value = 'productDesc'>Search By Description</Option>
                 </Select>
-                <Input placeholder="keywords" style={{width:150, margin:'0 15px'}}/>
-                <Button type = "primary">Search</Button>
+                <Input 
+                    placeholder="keywords" 
+                    style={{width:150, margin:'0 15px'}} 
+                    value= {searchName}
+                    onChange = {event =>this.setState({searchName:event.target.value})}
+                />
+                <Button type = "primary" onClick = {() =>this.getProducts(1)}>Search</Button>
             </span>
         )
         //right side button

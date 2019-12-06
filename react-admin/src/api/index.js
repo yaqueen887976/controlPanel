@@ -43,4 +43,13 @@ export const reqAddCategory = (categoryName,parentId) => ajax(BASE + '/manage/ca
 export const reqUpdateCategory = ({categoryId,categoryName}) => ajax(BASE + '/manage/category/update',{categoryId, categoryName},'POST')
 //reqWeather("北京")
 
-export const reqProducts = (pageNum,pageSize) => ajax(BASE + 'manage/product/list',{pageNum,pageSize})
+export const reqProducts = (pageNum,pageSize) => ajax(BASE + 'manage/product/list',{pageNum,pageSize});
+
+//search based on product name/description
+export const reqSearchProducts = ({pageNum,pageSize,searchName, searchType}) =>ajax(BASE + 'manage/product/search',{
+   pageNum,
+   pageSize,
+   [searchType]: searchName, //productName/productDesc
+});
+
+
